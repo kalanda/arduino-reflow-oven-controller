@@ -1,0 +1,235 @@
+// Run interval mode
+void runAs_profile(int profile)
+{
+   display_printTitle(F("Running Leaded"));
+
+   keyboard_waitForNokey();
+
+   // attachInterrupt(0, keyboard_interrupts, FALLING);
+   // attachInterrupt(1, keyboard_interrupts, FALLING);
+
+
+   if (profile == REFLOW_PROFILE_LEADED) {
+
+      currentReflowProfile.soak_min = 150;
+      currentReflowProfile.soak_max = 180;
+      currentReflowProfile.reflow_max = 220;
+      currentReflowProfile.cool_min = 100;
+   }
+
+   if (profile == REFLOW_PROFILE_LEADFREE) {
+
+      currentReflowProfile.soak_min = 150;
+      currentReflowProfile.soak_max = 200;
+      currentReflowProfile.reflow_max = 250;
+      currentReflowProfile.cool_min = 100;
+   }
+
+   if (profile == REFLOW_PROFILE_TESTING) {
+      currentReflowProfile.soak_min = 60;
+      currentReflowProfile.soak_max = 90;
+      currentReflowProfile.reflow_max = 100;
+      currentReflowProfile.cool_min = 50;
+   }
+
+   currentReflowState = REFLOW_STATE_IDLE;
+   currentReflowStatus = REFLOW_STATUS_OFF;
+
+   // Start timer
+   FlexiTimer2::set(PID_SAMPLE_TIME, runAs_profile_refresh);
+   FlexiTimer2::start();
+
+   for(boolean exit = false; !exit; )
+   {
+      keyboard_waitForAnyKey();
+      if(lastKey==KEY_AH) exit = true;
+   }
+   analogWrite(PINS_SSR, 0);
+   FlexiTimer2::stop();
+
+   display_printAborting();
+   keyboard_waitForNokey();
+
+   // detachInterrupt(0);
+   // detachInterrupt(1);
+}
+
+void runAs_profile_update_input()
+{
+  // Read current temperature
+  pid_input = thermocouple.readThermocouple(CELSIUS);
+
+  if((pid_input == FAULT_OPEN) || (pid_input == FAULT_SHORT_GND) || (pid_input == FAULT_SHORT_VCC))
+  {
+    currentReflowState = REFLOW_STATE_ERROR;
+    currentReflowStatus = REFLOW_STATUS_OFF;
+  }
+
+}
+
+void runAs_profile_refresh()
+{
+
+   runAs_profile_update_input();
+
+   switch (currentReflowState)
+   {
+      case REFLOW_STATE_IDLE:
+
+            display_printTitle(F("Idle"));
+
+            // If oven temperature is still above room temperature
+            if (pid_input >= TEMPERATURE_ROOM)
+            {
+              currentReflowState = REFLOW_STATE_TOO_HOT;
+            }
+            else
+            {
+               // Initialize seconds timer
+               timerSeconds = 0;
+
+               // Ramp up to minimum soaking temperature
+               pid_setPoint = currentReflowProfile.soak_min;
+
+               // Proceed to preheat stage
+               currentReflowState = REFLOW_STATE_PREHEAT;
+            }
+            break;
+
+      case REFLOW_STATE_PREHEAT:
+
+            display_printTitle(F("Pre-heating"));
+
+            currentReflowStatus = REFLOW_STATUS_ON;
+
+            // If minimum soak temperature is achieve
+            if (pid_input >= currentReflowProfile.soak_min)
+            {
+               // Set less agressive PID parameters for soaking ramp
+               reflowOvenPID.SetTunings(PID_KP_SOAK, PID_KI_SOAK, PID_KD_SOAK);
+               // Ramp up to first section of soaking temperature
+               pid_setPoint = currentReflowProfile.soak_min + SOAK_TEMPERATURE_STEP;
+               // Proceed to soaking state
+               currentReflowState = REFLOW_STATE_SOAK;
+            }
+            break;
+
+      case REFLOW_STATE_SOAK:
+
+            display_printTitle(F("Soaking"));
+
+            // If micro soak temperature is achieved
+            //if (millis() > timerSoak)
+            //{
+               //timerSoak = millis() + SOAK_MICRO_PERIOD;
+               // Increment micro setpoint
+               if (pid_setPoint > currentReflowProfile.soak_max)
+               {
+                 // Set agressive PID parameters for reflow ramp
+                 reflowOvenPID.SetTunings(PID_KP_REFLOW, PID_KI_REFLOW, PID_KD_REFLOW);
+                 // Ramp up to first section of soaking temperature
+                 pid_setPoint = currentReflowProfile.reflow_max;
+                 // Proceed to reflowing state
+                 currentReflowState = REFLOW_STATE_REFLOW;
+               }
+               else
+               {
+                  if (pid_input >= pid_setPoint) {
+                     pid_setPoint += SOAK_TEMPERATURE_STEP;
+                  }
+               }
+            //}
+            break;
+
+      case REFLOW_STATE_REFLOW:
+
+            display_printTitle(F("Reflowing"));
+
+            // We need to avoid hovering at peak temperature for too long
+            // Crude method that works like a charm and safe for the components
+            if (pid_input >= (currentReflowProfile.reflow_max - 5))
+            {
+               // Set PID parameters for cooling ramp
+               reflowOvenPID.SetTunings(PID_KP_REFLOW, PID_KI_REFLOW, PID_KD_REFLOW);
+               // Ramp down to minimum cooling temperature
+               pid_setPoint = currentReflowProfile.cool_min;
+               // Proceed to cooling state
+               currentReflowState = REFLOW_STATE_COOL;
+               buzzer_beep(500);
+            }
+            break;
+
+      case REFLOW_STATE_COOL:
+
+            display_printTitle(F("Cooling (open door)"));
+
+            // If minimum cool temperature is achieve
+            if (pid_input <= currentReflowProfile.cool_min)
+            {
+               buzzer_beep(500);
+               // Turn off reflow process
+               currentReflowStatus = REFLOW_STATUS_OFF;
+               // Proceed to reflow Completion state
+               currentReflowState = REFLOW_STATE_COMPLETE;
+            }
+            break;
+
+      case REFLOW_STATE_COMPLETE:
+
+            display_printTitle(F("Complete!"));
+            buzzer_beep(500);
+            break;
+
+      case REFLOW_STATE_TOO_HOT:
+
+            display_printTitle(F("Wait, too hot!"));
+
+            // If oven temperature drops below room temperature
+            if (pid_input < TEMPERATURE_ROOM)
+            {
+               // Ready to reflow
+               currentReflowState = REFLOW_STATE_IDLE;
+            }
+            break;
+
+      case REFLOW_STATE_ERROR:
+
+            display_printTitle(F("TC Error!"));
+
+            // If thermocouple problem is still present
+            if((pid_input == FAULT_OPEN) || (pid_input == FAULT_SHORT_GND) || (pid_input == FAULT_SHORT_VCC))
+            {
+               // Wait until thermocouple wire is connected
+               currentReflowState = REFLOW_STATE_ERROR;
+            }
+            else
+            {
+               // Clear to perform reflow process
+               currentReflowState = REFLOW_STATE_IDLE;
+            }
+            break;
+   }
+
+   // SSR control
+   if (currentReflowStatus == REFLOW_STATUS_ON)
+   {
+      reflowOvenPID.Compute();
+      analogWrite(PINS_SSR, pid_output);
+
+      logger_log(timerSeconds, pid_setPoint, pid_input, pid_output, reflowStateName[currentReflowState]);
+      lcd.setCursor(0,1);
+      lcd.print(timerSeconds);
+      lcd.print("s");
+      lcd.setCursor(8,1);
+      lcd.print((int)pid_input);
+      lcd.write((uint8_t)SYMBOL_DEGREE);
+      lcd.print(F("C"));
+
+      // Increase seconds timer for reflow curve analysis
+      timerSeconds++;
+   }
+   else
+   {
+      analogWrite(PINS_SSR, 0);
+   }
+}
