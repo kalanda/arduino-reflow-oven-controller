@@ -104,8 +104,7 @@ volatile boolean cancelFlag = false;    // Flag used to abort interrupt mode
 // Global variables
 uint8_t lastKey = KEY_NONE;     // Last key pressed
 boolean flagHoldKey = false;    // Flag to ignore keys after a hold key
-
-// timerSeconds
+int currentStage = 0;
 int timerSeconds = 0;
 
 // Setup before start

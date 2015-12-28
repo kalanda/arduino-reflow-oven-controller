@@ -119,7 +119,6 @@ double temperature_read(){
     analogWrite(PINS_SSR, 0);
     lcd.clear();
     lcd.print(F("TC Error!"));
-    buzzer_beep(50);
     delay(1000);
     read = thermocouple.readThermocouple(CELSIUS);
   }

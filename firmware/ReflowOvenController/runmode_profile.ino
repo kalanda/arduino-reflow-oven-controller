@@ -1,4 +1,4 @@
-int currentStage = 0;
+
 
 // Run profile
 void runAs_profile(int profile)
@@ -6,7 +6,7 @@ void runAs_profile(int profile)
    display_printTitle(F("Running profile"));
    keyboard_waitForNokey();
 
-   //if (profile == REFLOW_PROFILE_LEADED) {
+   if (profile == REFLOW_PROFILE_LEADED) {
 
       currentReflowProfile[0].name = "Pre-heat";
       currentReflowProfile[0].targetTemperature = 150;
@@ -39,8 +39,44 @@ void runAs_profile(int profile)
       currentReflowProfile[3].pid_kp = PID_KP_PREHEAT;
       currentReflowProfile[3].pid_ki = PID_KP_PREHEAT;
       currentReflowProfile[3].pid_kd = PID_KP_PREHEAT;
-   //}
+   }
 
+   if (profile == REFLOW_PROFILE_LEADFREE) {
+
+      currentReflowProfile[0].name = "Pre-heat";
+      currentReflowProfile[0].targetTemperature = 150;
+      currentReflowProfile[0].durationInSeconds = 90;
+      currentReflowProfile[0].elapsedTime = 0;
+      currentReflowProfile[0].pid_kp = PID_KP_PREHEAT;
+      currentReflowProfile[0].pid_ki = PID_KI_PREHEAT;
+      currentReflowProfile[0].pid_kd = PID_KD_PREHEAT;
+
+      currentReflowProfile[1].name = "Soak";
+      currentReflowProfile[1].targetTemperature = 220;
+      currentReflowProfile[1].durationInSeconds = 90;
+      currentReflowProfile[1].elapsedTime = 0;
+      currentReflowProfile[1].pid_kp = PID_KP_SOAK;
+      currentReflowProfile[1].pid_ki = PID_KI_SOAK;
+      currentReflowProfile[1].pid_kd = PID_KD_SOAK;
+
+      currentReflowProfile[2].name = "Reflow";
+      currentReflowProfile[2].targetTemperature = 255;
+      currentReflowProfile[2].durationInSeconds = 60;
+      currentReflowProfile[2].elapsedTime = 0;
+      currentReflowProfile[2].pid_kp = PID_KP_REFLOW;
+      currentReflowProfile[2].pid_ki = PID_KP_REFLOW;
+      currentReflowProfile[2].pid_kd = PID_KP_REFLOW;
+
+      currentReflowProfile[3].name = "Cool";
+      currentReflowProfile[3].targetTemperature = 50;
+      currentReflowProfile[3].durationInSeconds = 60;
+      currentReflowProfile[3].elapsedTime = 0;
+      currentReflowProfile[3].pid_kp = PID_KP_PREHEAT;
+      currentReflowProfile[3].pid_ki = PID_KP_PREHEAT;
+      currentReflowProfile[3].pid_kd = PID_KP_PREHEAT;
+   }
+
+   timerSeconds = 0;
    currentStage = 0;
 
    // Start timer
@@ -54,6 +90,7 @@ void runAs_profile(int profile)
    }
    analogWrite(PINS_SSR, 0);
    FlexiTimer2::stop();
+   buzzer_beep(1000);
 
    display_printAborting();
    keyboard_waitForNokey();
@@ -95,6 +132,7 @@ void runAs_profile_refresh()
       if ( pid_input >= currentReflowProfile[currentStage].targetTemperature &&
          currentReflowProfile[currentStage].elapsedTime >= currentReflowProfile[currentStage].durationInSeconds) {
          currentStage++;
+         buzzer_beep(1000);
       } else {
          currentReflowProfile[currentStage].elapsedTime++;
       }
@@ -102,10 +140,6 @@ void runAs_profile_refresh()
       if ( pid_input <= currentReflowProfile[currentStage].targetTemperature &&
          currentReflowProfile[currentStage].elapsedTime >= currentReflowProfile[currentStage].durationInSeconds) {
          currentStage++;
-         if (currentStage == REFLOW_STAGE_COOL || currentStage > REFLOW_STAGE_COOL)
-         {
-               buzzer_beep(800);
-         }
       } else {
          currentReflowProfile[currentStage].elapsedTime++;
       }
