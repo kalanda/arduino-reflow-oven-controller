@@ -38,18 +38,20 @@ void controller_showProfileMenu()
   {
     display_printTitle(F("Run profile"));
 
-    if(currentOption==0) display_printEnumeration(0, F("Leaded"));
-    if(currentOption==1) display_printEnumeration(1, F("Lead-free"));
+    if(currentOption==REFLOW_PROFILE_LEADED)   display_printEnumeration(0, F("Leaded"));
+    if(currentOption==REFLOW_PROFILE_LEADFREE) display_printEnumeration(1, F("Lead-free"));
+    if(currentOption==REFLOW_PROFILE_GPU)      display_printEnumeration(2, F("GPU"));
 
     keyboard_waitForAnyKey();
 
-    if(lastKey==KEY_A) circularList_incrementBy(&currentOption, 0, 1, -1);
-    if(lastKey==KEY_B) circularList_incrementBy(&currentOption, 0, 1, 1);
+    if(lastKey==KEY_A) circularList_incrementBy(&currentOption, 0, 2, -1);
+    if(lastKey==KEY_B) circularList_incrementBy(&currentOption, 0, 2, 1);
     if(lastKey==KEY_AH) exit = true;
     if(lastKey==KEY_BH)
     {
-          if(currentOption==0) runAs_profile(REFLOW_PROFILE_LEADED);
-          if(currentOption==1) runAs_profile(REFLOW_PROFILE_LEADFREE);
+          if(currentOption==REFLOW_PROFILE_LEADED)   runAs_profile(REFLOW_PROFILE_LEADED);
+          if(currentOption==REFLOW_PROFILE_LEADFREE) runAs_profile(REFLOW_PROFILE_LEADFREE);
+          if(currentOption==REFLOW_PROFILE_GPU)      runAs_profile(REFLOW_PROFILE_GPU);
     }
   }
 }

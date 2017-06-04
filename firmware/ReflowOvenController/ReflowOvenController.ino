@@ -61,6 +61,7 @@
 
 #define REFLOW_PROFILE_LEADED      0
 #define REFLOW_PROFILE_LEADFREE    1
+#define REFLOW_PROFILE_GPU         2
 
 #define REFLOW_STAGE_PREHEAT       0
 #define REFLOW_STAGE_SOAK          1
