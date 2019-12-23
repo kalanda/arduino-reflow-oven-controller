@@ -3,7 +3,7 @@
 // Run profile
 void runAs_profile(int profile)
 {
-   display_printTitle(F("Running profile"));
+   display_printTitle(F("Running"));
    keyboard_waitForNokey();
 
    if (profile == REFLOW_PROFILE_LEADED) {
@@ -160,12 +160,18 @@ void profile_displayStatus(){
       display_printTitle(currentReflowProfile[currentStage].name);
    }
 
-   lcd.print(timerSeconds);
-   lcd.print("s");
-   lcd.setCursor(8,1);
-   lcd.print((int)pid_input);
-   lcd.write((uint8_t)SYMBOL_DEGREE);
-   lcd.print(F("C"));
+    display.setCursor(0, 20);
+    display.setTextSize(2);
+    display.print(pid_input, 1);
+    display.setCursor(display.getCursorX(), display.getCursorY() - 6);
+    display.write(9);
+    display.setCursor(display.getCursorX(), display.getCursorY() + 6);
+    display.println(F("C"));
+    display.setTextSize(1);
+    display.setCursor(0, display.getCursorY() + 4);
+    display.print(timerSeconds);
+    display.println("s");
+    display.display();
 }
 
 double profile_calculateSetPoint(){

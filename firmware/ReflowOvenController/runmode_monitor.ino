@@ -25,8 +25,14 @@ void runAs_tempMonitor_updateTemp()
 
   display_printTitle(F("Temp monitor"));
 
-  lcd.print((int)lastTemperature);
-  lcd.write((uint8_t)SYMBOL_DEGREE);
-  lcd.print(F("C"));
+  display.setCursor(0,20);
+  display.setTextSize(2);
+  display.print(lastTemperature, 1);
+  display.setCursor(display.getCursorX(), display.getCursorY() - 6);
+  display.write(9);
+  display.setCursor(display.getCursorX(), display.getCursorY() + 6);
+  display.println(F("C"));
+  display.setTextSize(1);
+  display.display();
 
 }

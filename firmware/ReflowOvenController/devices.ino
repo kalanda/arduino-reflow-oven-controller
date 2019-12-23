@@ -76,35 +76,40 @@ void buzzer_beep(int time)
 }
 
 // prints screen title
-void display_printTitle(const __FlashStringHelper* str)
+void display_printTitle(String str)
 {
-    lcd.clear();
-    lcd.print(">");
-    lcd.print(str);
-    lcd.setCursor(0,1);
+    display.clearDisplay();
+    display.drawLine(0, 11, display.width(), 11, BLACK);
+    display.setCursor(0,0);
+    display.println(str);
+    display.println();
+    display.display();
 }
 
-// prints screen title
-void display_printTitle(const char* str)
+void display_printEnumeration(byte num, String str, byte currentOption)
 {
-    lcd.clear();
-    lcd.print(">");
-    lcd.print(str);
-    lcd.setCursor(0,1);
+    display_printEnumerationValue(num, str, String(), currentOption);
 }
 
-void display_printEnumeration(byte num, const __FlashStringHelper* str)
+void display_printEnumerationValue(byte num, String str, String val, byte currentOption)
 {
-    lcd.print(num, 10);
-    lcd.print(".");
-    lcd.print(str);
+    if(currentOption==num) display.setTextColor(WHITE, BLACK);
+    display.print(">");
+    display.print(str);
+    if(currentOption==num) display.setTextColor(BLACK);
+    display.setCursor(display.width() - (val.length() * 6), display.getCursorY());
+    display.print(val);
+    display.println();
+    display.setCursor(display.getCursorX(), display.getCursorY() + 2);
+    display.display();
 }
 
 // prints aborting message
 void display_printAborting()
 {
-  lcd.clear();
-  lcd.print(F("Aborting..."));
+    display.clearDisplay();
+    display.println(F("Aborting..."));
+    display.display();
 }
 
 double temperature_read(){
@@ -117,8 +122,9 @@ double temperature_read(){
     (read == FAULT_SHORT_VCC))
   {
     analogWrite(PINS_SSR, 0);
-    lcd.clear();
-    lcd.print(F("TC Error!"));
+    display.clearDisplay();
+    display.println(F("TC Error!"));
+    display.display();
     delay(1000);
     read = thermocouple.readThermocouple(CELSIUS);
   }

@@ -1,11 +1,14 @@
 // Import libraries
+#include <SPI.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_PCD8544.h>
 #include <LiquidCrystal.h>
 #include "FlexiTimer2_local.h"
 #include "PID_v1_local.h"
 #include "MAX31855_local.h"
 
 // Version
-#define CODE_MAJOR_VERSION     1  // major version
+#define CODE_MAJOR_VERSION     2  // major version
 #define CODE_MINOR_VERSION     0  // minor version
 
 // LCD settings
@@ -17,16 +20,13 @@
 #define PINS_TEMP_SO           9
 #define PINS_TEMP_CS           8
 #define PINS_TEMP_CLK          7
-#define PINS_LCD_LED           13
-#define PINS_LCD_RS            A2
-#define PINS_LCD_ENABLE        A1
-#define PINS_LCD_D4            A0
-#define PINS_LCD_D5            12
-#define PINS_LCD_D6            11
-#define PINS_LCD_D7            10
 #define PINS_BUZZER            5
 #define PINS_BTN_A             2
 #define PINS_BTN_B             3
+#define PINS_LCD_LED           A3
+#define PINS_LCD_DC            A0       
+#define PINS_LCD_CS            A1
+#define PINS_LCD_RST           A2
 
 // Custom characters and symbols addresses at lcd eeprom
 #define SYMBOL_DEGREE         0x00 // Degree
@@ -95,8 +95,8 @@ PID reflowOvenPID(&pid_input, &pid_output, &pid_setPoint, pid_kp, pid_ki, pid_kd
 // Thermocouple object instance
 MAX31855 thermocouple(PINS_TEMP_SO, PINS_TEMP_CS, PINS_TEMP_CLK);
 
-// LiquidCrystal LCD control object instance
-LiquidCrystal lcd(PINS_LCD_RS, PINS_LCD_ENABLE, PINS_LCD_D4, PINS_LCD_D5, PINS_LCD_D6, PINS_LCD_D7);
+// Display control object instance
+Adafruit_PCD8544 display = Adafruit_PCD8544(PINS_LCD_DC, PINS_LCD_CS, PINS_LCD_RST);
 
 // Variables used on interrupt mode
 volatile boolean cancelFlag = false;    // Flag used to abort interrupt mode
@@ -123,21 +123,16 @@ void setup()
   };
 
   // Initialize LCD
-  lcd.begin( LCD_COLS,  LCD_ROWS);
-  lcd.createChar(SYMBOL_DEGREE, char_degree);
-
+  display.begin();
+  display.clearDisplay();
+  display.setContrast(20);
+  
   // Pinmode inputs
   pinMode(PINS_BTN_A, INPUT_PULLUP);
   pinMode(PINS_BTN_B, INPUT_PULLUP);
 
   // Pinmode outputs
   pinMode(PINS_LCD_LED,     OUTPUT);
-  pinMode(PINS_LCD_RS,      OUTPUT);
-  pinMode(PINS_LCD_ENABLE,  OUTPUT);
-  pinMode(PINS_LCD_D4,      OUTPUT);
-  pinMode(PINS_LCD_D5,      OUTPUT);
-  pinMode(PINS_LCD_D6,      OUTPUT);
-  pinMode(PINS_LCD_D7,      OUTPUT);
   pinMode(PINS_BUZZER,      OUTPUT);
 
   // Turn on lcd backlight
@@ -162,5 +157,3 @@ void loop()
 {
   controller_run();
 }
-
-
