@@ -2,7 +2,6 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
-#include <LiquidCrystal.h>
 #include "FlexiTimer2_local.h"
 #include "PID_v1_local.h"
 #include "MAX31855_local.h"
@@ -11,15 +10,11 @@
 #define CODE_MAJOR_VERSION     2  // major version
 #define CODE_MINOR_VERSION     0  // minor version
 
-// LCD settings
-#define LCD_COLS              16  // columns
-#define LCD_ROWS               2  // rows
-
 // Pin settings
-#define PINS_SSR               6
 #define PINS_TEMP_SO           9
 #define PINS_TEMP_CS           8
 #define PINS_TEMP_CLK          7
+#define PINS_SSR               6
 #define PINS_BUZZER            5
 #define PINS_BTN_A             2
 #define PINS_BTN_B             3
@@ -27,9 +22,6 @@
 #define PINS_LCD_DC            A0       
 #define PINS_LCD_CS            A1
 #define PINS_LCD_RST           A2
-
-// Custom characters and symbols addresses at lcd eeprom
-#define SYMBOL_DEGREE         0x00 // Degree
 
 // Keycodes
 #define KEY_NONE             0 // No keys pressed
@@ -45,7 +37,7 @@
 #define KEY_HOLD_TIME_WAIT  100 // Used for double key holding
 
 // PID values
-#define PID_SAMPLE_TIME    1000     // Milliseconds
+#define PID_SAMPLE_TIME        1000     // Milliseconds
 #define PID_KP_PREHEAT      100.000
 #define PID_KI_PREHEAT        0.025
 #define PID_KD_PREHEAT       20.000
@@ -110,18 +102,6 @@ int timerSeconds = 0;
 // Setup before start
 void setup()
 {
-  // Create custom LCD char for degree symbol
-  uint8_t char_degree[8]  = {
-      B01100,
-      B10010,
-      B10010,
-      B01100,
-      B00000,
-      B00000,
-      B00000,
-      B00000
-  };
-
   // Initialize LCD
   display.begin();
   display.clearDisplay();
