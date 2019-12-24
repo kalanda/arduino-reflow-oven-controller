@@ -2,9 +2,9 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include <Adafruit_MAX31855.h>
 #include <PID_v1.h>
 #include "FlexiTimer2_local.h"
-#include "MAX31855_local.h"
 
 // Version
 #define CODE_MAJOR_VERSION     2  // major version
@@ -85,7 +85,7 @@ double pid_kd = PID_KD_PREHEAT;
 PID reflowOvenPID(&pid_input, &pid_output, &pid_setPoint, pid_kp, pid_ki, pid_kd, DIRECT);
 
 // Thermocouple object instance
-MAX31855 thermocouple(PINS_TEMP_SO, PINS_TEMP_CS, PINS_TEMP_CLK);
+Adafruit_MAX31855 thermocouple(PINS_TEMP_CS);
 
 // Display control object instance
 Adafruit_PCD8544 display = Adafruit_PCD8544(PINS_LCD_DC, PINS_LCD_CS, PINS_LCD_RST);

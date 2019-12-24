@@ -114,19 +114,15 @@ void display_printAborting()
 
 double temperature_read(){
 
-  double read = thermocouple.readThermocouple(CELSIUS);
-
-  while(
-    (read == FAULT_OPEN) ||
-    (read == FAULT_SHORT_GND) ||
-    (read == FAULT_SHORT_VCC))
-  {
+  double read = thermocouple.readCelsius();
+  
+  while (isnan(read)) {
     analogWrite(PINS_SSR, 0);
     display.clearDisplay();
     display.println(F("TC Error!"));
     display.display();
     delay(1000);
-    read = thermocouple.readThermocouple(CELSIUS);
+    read = thermocouple.readCelsius();
   }
 
   return read;
