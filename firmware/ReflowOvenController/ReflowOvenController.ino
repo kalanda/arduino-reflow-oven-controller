@@ -1,5 +1,6 @@
 // Import libraries
 #include <SPI.h>
+#include <EEPROM.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
 #include <Adafruit_MAX31855.h>
@@ -28,6 +29,10 @@
 #define KEY_AH               3 // Button A was pressed and holded (KEY_HOLD_TIME) milisecons
 #define KEY_BH               4 // Button B was pressed and holded (KEY_HOLD_TIME) milisecons
 #define KEY_ABH              5 // Buttons A+B was pressed and holded (KEY_HOLD_TIME) milisecons
+
+// EEPROM Addresses
+#define ADDR_BACKLIGHT          1
+#define ADDR_CONTRAST           2
 
 // Keyboard times
 #define KEY_DEBOUNCE_TIME    30 // debounce time (ms) to prevent flickering when pressing or releasing the button
@@ -100,10 +105,14 @@ int timerSeconds = 0;
 // Setup before start
 void setup()
 {
+  // Initialize EEPROM data
+  uint8_t contrast = EEPROM.read(ADDR_CONTRAST);
+  contrast = ((contrast >= 10) && (contrast <= 100)) ? contrast : 50;
+  
   // Initialize LCD
   display.begin();
   display.clearDisplay();
-  display.setContrast(20);
+  display.setContrast(contrast);
   
   // Pinmode inputs
   pinMode(PINS_BTN_A, INPUT_PULLUP);
@@ -113,8 +122,8 @@ void setup()
   pinMode(PINS_LCD_LED,     OUTPUT);
   pinMode(PINS_BUZZER,      OUTPUT);
 
-  // Turn on lcd backlight
-  digitalWrite(PINS_LCD_LED, HIGH);
+  // Restore the backlight setting
+  digitalWrite(PINS_LCD_LED, EEPROM.read(ADDR_BACKLIGHT));
 
   // Tell the PID to range between 0 and 255 (PWM Output)
   reflowOvenPID.SetOutputLimits(0, 255);

@@ -78,11 +78,8 @@ void controller_showSettingsMenu()
     if(lastKey==KEY_AH) exit = true;
     if(lastKey==KEY_B)
     {
-          if(currentOption==0) digitalWrite(PINS_LCD_LED, !currentBacklight);
-          if(currentOption==1) {
-            circularList_incrementBy(&currentContrast, 10, 100, 10);
-            display.setContrast(currentContrast);
-          }
+          if(currentOption==0) toggle_backlight();
+          if(currentOption==1) increase_contrast();
     }
   }
 }
