@@ -11,17 +11,15 @@
 #define CODE_MINOR_VERSION     0  // minor version
 
 // Pin settings
-#define PINS_TEMP_SO           9
-#define PINS_TEMP_CS           8
-#define PINS_TEMP_CLK          7
-#define PINS_SSR               6
-#define PINS_BUZZER            5
-#define PINS_BTN_A             2
-#define PINS_BTN_B             3
-#define PINS_LCD_LED           A3
-#define PINS_LCD_DC            A0       
-#define PINS_LCD_CS            A1
-#define PINS_LCD_RST           A2
+#define PINS_TEMP_CS           9
+#define PINS_SSR               5
+#define PINS_BUZZER            7
+#define PINS_BTN_A             6
+#define PINS_BTN_B             8
+#define PINS_LCD_LED           A0
+#define PINS_LCD_DC            A1       
+#define PINS_LCD_CS            A2
+#define PINS_LCD_RST           A3
 
 // Keycodes
 #define KEY_NONE             0 // No keys pressed
