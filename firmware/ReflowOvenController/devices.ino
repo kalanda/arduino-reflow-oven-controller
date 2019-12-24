@@ -70,9 +70,11 @@ void keyboard_waitForNokey()
 // Beeps buzzer a time in ms
 void buzzer_beep(int time)
 {
-  analogWrite(PINS_BUZZER,64);
-  delay(time);
-  analogWrite(PINS_BUZZER,0);
+  tone(PINS_BUZZER, 3000);
+  delay(time/2);
+  tone(PINS_BUZZER, 1000);
+  delay(time/2);
+  noTone(PINS_BUZZER);
 }
 
 // prints screen title
