@@ -2,8 +2,8 @@
 #include <SPI.h>
 #include <Adafruit_GFX.h>
 #include <Adafruit_PCD8544.h>
+#include <PID_v1.h>
 #include "FlexiTimer2_local.h"
-#include "PID_v1_local.h"
 #include "MAX31855_local.h"
 
 // Version
