@@ -13,7 +13,7 @@
 
 // Pin settings
 #define PINS_TEMP_CS           9
-#define PINS_SSR               5
+#define PINS_SSR               3
 #define PINS_BUZZER            7
 #define PINS_BTN_A             6
 #define PINS_BTN_B             8
