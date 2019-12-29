@@ -5,6 +5,7 @@ void runAs_profile(int profile)
 {
    display_printTitle(F("Running"));
    keyboard_waitForNokey();
+   buzzer_start_tone();
 
    if (profile == REFLOW_PROFILE_LEADED) {
 
@@ -90,7 +91,6 @@ void runAs_profile(int profile)
    }
    analogWrite(PINS_SSR, 0);
    FlexiTimer2::stop();
-   buzzer_beep(1000);
 
    display_printAborting();
    keyboard_waitForNokey();
@@ -110,6 +110,8 @@ void runAs_profile_refresh()
 
       // Turn off the oven
       analogWrite(PINS_SSR, 0);
+
+      buzzer_finish_tone();
 
       // Return doing nothing
       return;
@@ -132,7 +134,7 @@ void runAs_profile_refresh()
       if ( pid_input >= currentReflowProfile[currentStage].targetTemperature &&
          currentReflowProfile[currentStage].elapsedTime >= currentReflowProfile[currentStage].durationInSeconds) {
          currentStage++;
-         buzzer_beep(1000);
+         buzzer_stage_tone();
       } else {
          currentReflowProfile[currentStage].elapsedTime++;
       }

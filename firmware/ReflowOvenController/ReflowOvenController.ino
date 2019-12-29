@@ -6,6 +6,8 @@
 #include <Adafruit_MAX31855.h>
 #include <PID_v1.h>
 #include "FlexiTimer2_local.h"
+#include <NewTone.h>
+#include "pitches.h"
 
 // Version
 #define CODE_MAJOR_VERSION     2  // major version

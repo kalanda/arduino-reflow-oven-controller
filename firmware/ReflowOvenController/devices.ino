@@ -24,7 +24,7 @@ void keyboard_scan(boolean quickmode)
 
   if (flagHoldKey && !quickmode)
   {
-      buzzer_beep(100);
+      buzzer_back_tone();
       while( !digitalRead(PINS_BTN_A) || !digitalRead(PINS_BTN_B)) {}
       flagHoldKey = false;
       lastKey = KEY_NONE;
@@ -67,14 +67,34 @@ void keyboard_waitForNokey()
    delay(100);
 }
 
-// Beeps buzzer a time in ms
-void buzzer_beep(int time)
+// Plays the back tone on the buzzer
+void buzzer_back_tone()
 {
-  tone(PINS_BUZZER, 3000);
-  delay(time/2);
-  tone(PINS_BUZZER, 1000);
-  delay(time/2);
-  noTone(PINS_BUZZER);
+  NewTone(PINS_BUZZER, NOTE_FS7, 50);
+  delay(100);
+  NewTone(PINS_BUZZER, NOTE_C6, 50);
+}
+
+// Plays the start tone on the buzzer
+void buzzer_start_tone()
+{
+  NewTone(PINS_BUZZER, NOTE_D6, 100);
+  delay(100);
+  NewTone(PINS_BUZZER, NOTE_A6, 300);
+}
+
+// Plays the finish tone on the buzzer
+// Note this method cannot use delay as its called from inside an interrupt
+void buzzer_finish_tone()
+{
+  NewTone(PINS_BUZZER, NOTE_C6, 1000);
+}
+
+// Plays the stage change on the buzzer
+// Note this method cannot use delay as its called from inside an interrupt
+void buzzer_stage_tone()
+{
+  NewTone(PINS_BUZZER, NOTE_F6, 100);
 }
 
 // prints screen title
