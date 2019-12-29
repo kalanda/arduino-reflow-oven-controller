@@ -43,15 +43,15 @@
 
 // PID values
 #define PID_SAMPLE_TIME        1000     // Milliseconds
-#define PID_KP_PREHEAT      100.000
-#define PID_KI_PREHEAT        0.025
-#define PID_KD_PREHEAT       20.000
-#define PID_KP_SOAK         300.000
-#define PID_KI_SOAK           0.050
-#define PID_KD_SOAK         250.000
-#define PID_KP_REFLOW       300.000
-#define PID_KI_REFLOW         0.050
-#define PID_KD_REFLOW       350.000
+#define PID_KP_PREHEAT         2.84
+#define PID_KI_PREHEAT         0.01
+#define PID_KD_PREHEAT         0.00
+#define PID_KP_SOAK            2.84
+#define PID_KI_SOAK            0.01
+#define PID_KD_SOAK            0.00
+#define PID_KP_REFLOW          2.84
+#define PID_KI_REFLOW          0.01
+#define PID_KD_REFLOW          0.00
 
 #define REFLOW_PROFILE_LEADED      0
 #define REFLOW_PROFILE_LEADFREE    1
