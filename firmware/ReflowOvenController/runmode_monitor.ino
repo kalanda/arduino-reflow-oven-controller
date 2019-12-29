@@ -14,8 +14,9 @@ void runAs_tempMonitor()
    		keyboard_waitForAnyKey();
    		if(lastKey==KEY_AH) exit = true;
    }
-
    FlexiTimer2::stop();
+
+   display_printAborting();
    keyboard_waitForNokey();
 }
 
