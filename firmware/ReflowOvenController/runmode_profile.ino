@@ -79,6 +79,7 @@ void runAs_profile(int profile)
 
    timerSeconds = 0;
    currentStage = 0;
+   startTemp = temperature_read();
 
    // Start timer
    FlexiTimer2::set(PID_SAMPLE_TIME, runAs_profile_refresh);
@@ -181,7 +182,7 @@ double profile_calculateSetPoint(){
    // Set start temperature for this stage
    double startTemperature = 0;
    if (currentStage == REFLOW_STAGE_PREHEAT) {
-      startTemperature = ROOM_TEMPERATURE;
+      startTemperature = startTemp;
    } else {
       startTemperature = currentReflowProfile[currentStage-1].targetTemperature;
    }

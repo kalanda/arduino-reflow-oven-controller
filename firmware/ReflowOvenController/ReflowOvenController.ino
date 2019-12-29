@@ -53,9 +53,6 @@
 #define PID_KI_REFLOW         0.050
 #define PID_KD_REFLOW       350.000
 
-// Minimun temperature to start a profile
-#define ROOM_TEMPERATURE          40
-
 #define REFLOW_PROFILE_LEADED      0
 #define REFLOW_PROFILE_LEADFREE    1
 
@@ -103,6 +100,7 @@ uint8_t lastKey = KEY_NONE;     // Last key pressed
 boolean flagHoldKey = false;    // Flag to ignore keys after a hold key
 int currentStage = 0;
 int timerSeconds = 0;
+double startTemp;
 
 // Setup before start
 void setup()
