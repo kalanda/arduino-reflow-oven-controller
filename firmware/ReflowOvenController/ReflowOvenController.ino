@@ -57,8 +57,9 @@
 
 #define REFLOW_STAGE_PREHEAT       0
 #define REFLOW_STAGE_SOAK          1
-#define REFLOW_STAGE_REFLOW        2
-#define REFLOW_STAGE_COOL          3
+#define REFLOW_STAGE_RAMP          2
+#define REFLOW_STAGE_REFLOW        3
+#define REFLOW_STAGE_COOL          4
 
 // Struct to hold the reflow stage parameters.
 typedef struct ReflowStage {

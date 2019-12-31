@@ -22,28 +22,36 @@ void runmode_Profile(int profile)
       currentReflowProfile[1].pid_ki = PID_KI_SOAK;
       currentReflowProfile[1].pid_kd = PID_KD_SOAK;
 
-      currentReflowProfile[2].name = "Reflow";
+      currentReflowProfile[2].name = "Ramp";
       currentReflowProfile[2].targetTemperature = 220;
-      currentReflowProfile[2].durationInSeconds = 30;
+      currentReflowProfile[2].durationInSeconds = 1;
       currentReflowProfile[2].elapsedTime = 0;
-      currentReflowProfile[2].pid_kp = PID_KP_REFLOW;
-      currentReflowProfile[2].pid_ki = PID_KP_REFLOW;
-      currentReflowProfile[2].pid_kd = PID_KP_REFLOW;
+      currentReflowProfile[2].pid_kp = PID_KP_PREHEAT;
+      currentReflowProfile[2].pid_ki = PID_KI_PREHEAT;
+      currentReflowProfile[2].pid_kd = PID_KD_PREHEAT;
 
-      currentReflowProfile[3].name = "Cool";
-      currentReflowProfile[3].targetTemperature = 50;
-      currentReflowProfile[3].durationInSeconds = 60;
+      currentReflowProfile[3].name = "Reflow";
+      currentReflowProfile[3].targetTemperature = 220;
+      currentReflowProfile[3].durationInSeconds = 30;
       currentReflowProfile[3].elapsedTime = 0;
-      currentReflowProfile[3].pid_kp = PID_KP_PREHEAT;
-      currentReflowProfile[3].pid_ki = PID_KP_PREHEAT;
-      currentReflowProfile[3].pid_kd = PID_KP_PREHEAT;
+      currentReflowProfile[3].pid_kp = PID_KP_REFLOW;
+      currentReflowProfile[3].pid_ki = PID_KP_REFLOW;
+      currentReflowProfile[4].pid_kd = PID_KP_REFLOW;
+
+      currentReflowProfile[4].name = "Cool";
+      currentReflowProfile[4].targetTemperature = 45;
+      currentReflowProfile[4].durationInSeconds = 1;
+      currentReflowProfile[4].elapsedTime = 0;
+      currentReflowProfile[4].pid_kp = PID_KP_PREHEAT;
+      currentReflowProfile[4].pid_ki = PID_KP_PREHEAT;
+      currentReflowProfile[4].pid_kd = PID_KP_PREHEAT;
    }
 
    if (profile == REFLOW_PROFILE_LEADFREE) {
 
       currentReflowProfile[0].name = "Pre-heat";
       currentReflowProfile[0].targetTemperature = 150;
-      currentReflowProfile[0].durationInSeconds = 90;
+      currentReflowProfile[0].durationInSeconds = 1;
       currentReflowProfile[0].elapsedTime = 0;
       currentReflowProfile[0].pid_kp = PID_KP_PREHEAT;
       currentReflowProfile[0].pid_ki = PID_KI_PREHEAT;
@@ -57,21 +65,29 @@ void runmode_Profile(int profile)
       currentReflowProfile[1].pid_ki = PID_KI_SOAK;
       currentReflowProfile[1].pid_kd = PID_KD_SOAK;
 
-      currentReflowProfile[2].name = "Reflow";
-      currentReflowProfile[2].targetTemperature = 255;
-      currentReflowProfile[2].durationInSeconds = 60;
+      currentReflowProfile[2].name = "Ramp";
+      currentReflowProfile[2].targetTemperature = 225;
+      currentReflowProfile[2].durationInSeconds = 1;
       currentReflowProfile[2].elapsedTime = 0;
-      currentReflowProfile[2].pid_kp = PID_KP_REFLOW;
-      currentReflowProfile[2].pid_ki = PID_KP_REFLOW;
-      currentReflowProfile[2].pid_kd = PID_KP_REFLOW;
+      currentReflowProfile[2].pid_kp = PID_KP_PREHEAT;
+      currentReflowProfile[2].pid_ki = PID_KI_PREHEAT;
+      currentReflowProfile[2].pid_kd = PID_KD_PREHEAT;
 
-      currentReflowProfile[3].name = "Cool";
-      currentReflowProfile[3].targetTemperature = 50;
+      currentReflowProfile[3].name = "Reflow";
+      currentReflowProfile[3].targetTemperature = 255;
       currentReflowProfile[3].durationInSeconds = 60;
       currentReflowProfile[3].elapsedTime = 0;
-      currentReflowProfile[3].pid_kp = PID_KP_PREHEAT;
-      currentReflowProfile[3].pid_ki = PID_KP_PREHEAT;
-      currentReflowProfile[3].pid_kd = PID_KP_PREHEAT;
+      currentReflowProfile[3].pid_kp = PID_KP_REFLOW;
+      currentReflowProfile[3].pid_ki = PID_KP_REFLOW;
+      currentReflowProfile[3].pid_kd = PID_KP_REFLOW;
+
+      currentReflowProfile[4].name = "Cool";
+      currentReflowProfile[4].targetTemperature = 45;
+      currentReflowProfile[4].durationInSeconds = 1;
+      currentReflowProfile[4].elapsedTime = 0;
+      currentReflowProfile[4].pid_kp = PID_KP_PREHEAT;
+      currentReflowProfile[4].pid_ki = PID_KP_PREHEAT;
+      currentReflowProfile[4].pid_kd = PID_KP_PREHEAT;
    }
    
    // Setup runmode
