@@ -102,6 +102,12 @@ int currentStage = 0;
 int timerSeconds = 0;
 double startTemp;
 
+#define SIMULATION_FLOOR       25
+
+boolean simulation = false;
+double simulationVelocity = 0;
+double simulatedTemp = SIMULATION_FLOOR;
+
 // Setup before start
 void setup()
 {

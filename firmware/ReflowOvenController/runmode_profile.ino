@@ -112,7 +112,7 @@ void runmode_Profile(int profile)
    }
 
    // Turn off the heater
-   analogWrite(PINS_SSR, 0);
+   ssr_setDutyCycle(0);
 
    // Exit the runmode
    display_printAborting();
@@ -123,7 +123,7 @@ void runmode_Profile(int profile)
 void profileTick()
 {
   // Shut down and short circuit if we've finished
-  if (currentStage > REFLOW_STAGE_COOL) { analogWrite(PINS_SSR, 0); display_printTitle(F("Complete!")); return; }
+  if (currentStage > REFLOW_STAGE_COOL) { ssr_setDutyCycle(0); display_printTitle(F("Complete!")); return; }
   
   // Read the current temperature
   pid_input = temperature_read();
@@ -136,7 +136,7 @@ void profileTick()
   reflowOvenPID.Compute();
   
   // Put PID output to SSR
-  analogWrite(PINS_SSR, pid_output);
+  ssr_setDutyCycle(pid_output);
   
   // Update the screen
   display_printTemperature(currentReflowProfile[currentStage].name, pid_input, timerSeconds);

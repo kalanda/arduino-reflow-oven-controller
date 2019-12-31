@@ -71,15 +71,17 @@ void controller_showSettingsMenu()
 
     display_printEnumerationValue(0, F("Backlight"), backlight, currentOption);
     display_printEnumerationValue(1, F("Contrast"), String(currentContrast / 10), currentOption);
+    display_printEnumerationValue(2, F("Simulate"), simulation ? F("ON") : F("OFF"), currentOption);
 
     keyboard_waitForAnyKey();
 
-    if(lastKey==KEY_A) circularList_incrementBy(&currentOption, 0, 1, 1);
+    if(lastKey==KEY_A) circularList_incrementBy(&currentOption, 0, 2, 1);
     if(lastKey==KEY_AH) exit = true;
     if(lastKey==KEY_B)
     {
           if(currentOption==0) toggle_backlight();
           if(currentOption==1) increase_contrast();
+          if(currentOption==2) simulation = !simulation;
     }
   }
 }

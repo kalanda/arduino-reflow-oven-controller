@@ -165,10 +165,12 @@ void display_printTemperature(String title, double temperature, int seconds)
 
 double temperature_read(){
 
+  if (simulation) return simulation_read();
+
   double read = thermocouple.readCelsius();
   
   while (isnan(read)) {
-    analogWrite(PINS_SSR, 0);
+    ssr_setDutyCycle(0);
     display.clearDisplay();
     display.println(F("TC Error!"));
     display.display();
@@ -177,4 +179,34 @@ double temperature_read(){
   }
 
   return read;
+}
+
+double simulation_read() {
+
+  // adjust the simulation velicity
+  if (pid_output == 0) {
+    simulationVelocity = max(0, simulationVelocity - 1);
+  } else {
+    simulationVelocity = min(14, simulationVelocity + (pid_output / 1024));
+  }
+
+  // Update the simulated temp
+  if (pid_output == 0 && simulationVelocity == 0) {
+    simulatedTemp = max(SIMULATION_FLOOR, simulatedTemp * 0.995);
+  } else {
+    simulatedTemp += (pow(simulationVelocity,2) / 256);
+  }
+
+  // Add some noise ... for fun
+  simulatedTemp += random(-0.25, 0.25);
+
+  // Do some monkey math to return a value to the nearest 0.25 to simulate our sensor
+  return ((int)((simulatedTemp * 4.0) + 0.5) / 4.0); 
+}
+
+void ssr_setDutyCycle(int duty) {
+  // If we're simulating; don't actually turn on the SSR
+  if (simulation) return;
+
+  analogWrite(PINS_SSR, duty);
 }
