@@ -16,3 +16,21 @@ void circularList_incrementBy(byte *value, byte minimun, byte maximun, int incre
   }
 
 }
+
+// toggle the backlight and store the value in EEPROM for reboots
+void toggle_backlight() {
+  bool currentBacklight = digitalRead(PINS_LCD_LED);
+  
+  digitalWrite(PINS_LCD_LED, !currentBacklight);
+  EEPROM.update(ADDR_BACKLIGHT, !currentBacklight);
+}
+
+
+// increase the contrast (looping around if necessary) and store the value in EEPROM for reboots
+void increase_contrast() {
+  uint8_t currentContrast = display.getContrast();
+  
+  circularList_incrementBy(&currentContrast, 10, 100, 10);
+  display.setContrast(currentContrast);
+  EEPROM.update(ADDR_CONTRAST, currentContrast);
+}

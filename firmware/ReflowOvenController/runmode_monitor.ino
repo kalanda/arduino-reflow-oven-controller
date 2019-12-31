@@ -1,32 +1,40 @@
-void runAs_tempMonitor()
+void runmode_Monitor()
 {
-   display_printTitle(F("Temp monitor"));
-
    keyboard_waitForNokey();
-   runAs_tempMonitor_updateTemp();
 
-   // Start timer
-   FlexiTimer2::set(1000, runAs_tempMonitor_updateTemp);
-   FlexiTimer2::start();
+   // Setup
+   unsigned long nextTick = millis();
+   timerSeconds = 0;
+   lastKey = KEY_NONE;
 
+   // Run the moonitoring loop
    for(boolean exit = false; !exit; )
    {
-   		keyboard_waitForAnyKey();
+      if (millis() > nextTick) {
+        nextTick += PID_SAMPLE_TIME;
+        monitorTick();
+      }
+    
+   		keyboard_scan();
    		if(lastKey==KEY_AH) exit = true;
    }
 
-   FlexiTimer2::stop();
+   // Exit the runmode
+   display_printAborting();
    keyboard_waitForNokey();
 }
 
-void runAs_tempMonitor_updateTemp()
+void monitorTick()
 {
-  double lastTemperature = temperature_read();
+  // Read the current temperature
+  double pid_input = temperature_read();
 
-  display_printTitle(F("Temp monitor"));
+  // Update the screen
+  display_printTemperature(F("Temp monitor"), pid_input, timerSeconds);
 
-  lcd.print((int)lastTemperature);
-  lcd.write((uint8_t)SYMBOL_DEGREE);
-  lcd.print(F("C"));
+  // Log to serial for charts
+  logger_log(timerSeconds, 0, pid_input, 0, "monitoring");
 
+  // Increment the tick counter
+  timerSeconds++;
 }

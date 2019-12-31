@@ -24,7 +24,7 @@ void keyboard_scan(boolean quickmode)
 
   if (flagHoldKey && !quickmode)
   {
-      buzzer_beep(100);
+      buzzer_back_tone();
       while( !digitalRead(PINS_BTN_A) || !digitalRead(PINS_BTN_B)) {}
       flagHoldKey = false;
       lastKey = KEY_NONE;
@@ -67,61 +67,146 @@ void keyboard_waitForNokey()
    delay(100);
 }
 
-// Beeps buzzer a time in ms
-void buzzer_beep(int time)
+// Plays the back tone on the buzzer
+void buzzer_back_tone()
 {
-  analogWrite(PINS_BUZZER,64);
-  delay(time);
-  analogWrite(PINS_BUZZER,0);
+  NewTone(PINS_BUZZER, NOTE_FS7, 50);
+  delay(100);
+  NewTone(PINS_BUZZER, NOTE_C6, 50);
+}
+
+// Plays the start tone on the buzzer
+void buzzer_start_tone()
+{
+  NewTone(PINS_BUZZER, NOTE_D6, 100);
+  delay(100);
+  NewTone(PINS_BUZZER, NOTE_A6, 300);
+}
+
+// Plays the finish tone on the buzzer
+// Note this method cannot use delay as its called from inside an interrupt
+void buzzer_finish_tone()
+{
+  NewTone(PINS_BUZZER, NOTE_C6, 1000);
+}
+
+// Plays the stage change on the buzzer
+// Note this method cannot use delay as its called from inside an interrupt
+void buzzer_stage_tone()
+{
+  NewTone(PINS_BUZZER, NOTE_F6, 100);
 }
 
 // prints screen title
-void display_printTitle(const __FlashStringHelper* str)
+void display_printTitle(String str)
 {
-    lcd.clear();
-    lcd.print(">");
-    lcd.print(str);
-    lcd.setCursor(0,1);
+    display.clearDisplay();
+    display.drawLine(0, 11, display.width(), 11, BLACK);
+    display.setCursor(0,0);
+    display.println(str);
+    display.println();
+    display.display();
 }
 
-// prints screen title
-void display_printTitle(const char* str)
+void display_printEnumeration(byte num, String str, byte currentOption)
 {
-    lcd.clear();
-    lcd.print(">");
-    lcd.print(str);
-    lcd.setCursor(0,1);
+    display_printEnumerationValue(num, str, String(), currentOption);
 }
 
-void display_printEnumeration(byte num, const __FlashStringHelper* str)
+void display_printEnumerationValue(byte num, String str, String val, byte currentOption)
 {
-    lcd.print(num, 10);
-    lcd.print(".");
-    lcd.print(str);
+    if(currentOption==num) display.setTextColor(WHITE, BLACK);
+    display.print(">");
+    display.print(str);
+    if(currentOption==num) display.setTextColor(BLACK);
+    display.setCursor(display.width() - (val.length() * 6), display.getCursorY());
+    display.print(val);
+    display.println();
+    display.setCursor(display.getCursorX(), display.getCursorY() + 2);
+    display.display();
 }
 
 // prints aborting message
 void display_printAborting()
 {
-  lcd.clear();
-  lcd.print(F("Aborting..."));
+    display.clearDisplay();
+    display.println(F("Aborting..."));
+    display.display();
+}
+
+// prints the temperature monitor and elapsed time
+void display_printTemperature(String title, double temperature, int seconds)
+{
+    // Clear the screen buffer
+    display.clearDisplay();
+
+    // Add a title
+    display_printTitle(title);
+
+    // Display the temperature
+    display.setCursor(0,20);
+    display.setTextSize(2);
+    display.print(temperature, 1);
+    display.setCursor(display.getCursorX(), display.getCursorY() - 6);
+    display.write(9);
+    display.setCursor(display.getCursorX(), display.getCursorY() + 6);
+    display.println(F("C"));
+    display.setTextSize(1);
+
+    // Display the elapsed time
+    display.setCursor(0, display.getCursorY() + 4);
+    display.print(seconds);
+    display.println("s");
+    display.display();
+
+    // Push the screen buffer out
+    display.display();
 }
 
 double temperature_read(){
 
-  double read = thermocouple.readThermocouple(CELSIUS);
+  if (simulation) return simulation_read();
 
-  while(
-    (read == FAULT_OPEN) ||
-    (read == FAULT_SHORT_GND) ||
-    (read == FAULT_SHORT_VCC))
-  {
-    analogWrite(PINS_SSR, 0);
-    lcd.clear();
-    lcd.print(F("TC Error!"));
+  double read = thermocouple.readCelsius();
+  
+  while (isnan(read)) {
+    ssr_setDutyCycle(0);
+    display.clearDisplay();
+    display.println(F("TC Error!"));
+    display.display();
     delay(1000);
-    read = thermocouple.readThermocouple(CELSIUS);
+    read = thermocouple.readCelsius();
   }
 
   return read;
+}
+
+double simulation_read() {
+
+  // adjust the simulation velicity
+  if (pid_output == 0) {
+    simulationVelocity = max(0, simulationVelocity - 1);
+  } else {
+    simulationVelocity = min(14, simulationVelocity + (pid_output / 1024));
+  }
+
+  // Update the simulated temp
+  if (pid_output == 0 && simulationVelocity == 0) {
+    simulatedTemp = max(SIMULATION_FLOOR, simulatedTemp * 0.995);
+  } else {
+    simulatedTemp += (pow(simulationVelocity,2) / 256);
+  }
+
+  // Add some noise ... for fun
+  simulatedTemp += random(-0.25, 0.25);
+
+  // Do some monkey math to return a value to the nearest 0.25 to simulate our sensor
+  return ((int)((simulatedTemp * 4.0) + 0.5) / 4.0); 
+}
+
+void ssr_setDutyCycle(int duty) {
+  // If we're simulating; don't actually turn on the SSR
+  if (simulation) return;
+
+  analogWrite(PINS_SSR, duty);
 }
