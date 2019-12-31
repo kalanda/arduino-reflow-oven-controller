@@ -42,14 +42,14 @@
 #define KEY_HOLD_TIME_WAIT  100 // Used for double key holding
 
 // PID values
-#define PID_SAMPLE_TIME        1000     // Milliseconds
-#define PID_KP_PREHEAT         2.84
+#define PID_SAMPLE_TIME     1000     // Milliseconds
+#define PID_KP_PREHEAT         5.00
 #define PID_KI_PREHEAT         0.01
 #define PID_KD_PREHEAT         0.00
-#define PID_KP_SOAK            2.84
+#define PID_KP_SOAK            5.00
 #define PID_KI_SOAK            0.01
 #define PID_KD_SOAK            0.00
-#define PID_KP_REFLOW          2.84
+#define PID_KP_REFLOW          5.00
 #define PID_KI_REFLOW          0.01
 #define PID_KD_REFLOW          0.00
 

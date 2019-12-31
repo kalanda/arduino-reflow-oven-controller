@@ -11,7 +11,7 @@ void runAs_profile(int profile)
 
       currentReflowProfile[0].name = "Pre-heat";
       currentReflowProfile[0].targetTemperature = 150;
-      currentReflowProfile[0].durationInSeconds = 90;
+      currentReflowProfile[0].durationInSeconds = 1;
       currentReflowProfile[0].elapsedTime = 0;
       currentReflowProfile[0].pid_kp = PID_KP_PREHEAT;
       currentReflowProfile[0].pid_ki = PID_KI_PREHEAT;
@@ -182,7 +182,7 @@ double profile_calculateSetPoint(){
    // Set start temperature for this stage
    double startTemperature = 0;
    if (currentStage == REFLOW_STAGE_PREHEAT) {
-      startTemperature = startTemp;
+      startTemperature = currentReflowProfile[REFLOW_STAGE_PREHEAT].targetTemperature;
    } else {
       startTemperature = currentReflowProfile[currentStage-1].targetTemperature;
    }
