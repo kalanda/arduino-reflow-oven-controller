@@ -1,12 +1,9 @@
-
-
 // Run profile
-void runAs_profile(int profile)
+void runmode_Profile(int profile)
 {
-   display_printTitle(F("Running"));
    keyboard_waitForNokey();
-   buzzer_start_tone();
 
+   // Define the reflow profile
    if (profile == REFLOW_PROFILE_LEADED) {
 
       currentReflowProfile[0].name = "Pre-heat";
@@ -76,105 +73,88 @@ void runAs_profile(int profile)
       currentReflowProfile[3].pid_ki = PID_KP_PREHEAT;
       currentReflowProfile[3].pid_kd = PID_KP_PREHEAT;
    }
-
+   
+   // Setup runmode
+   unsigned long nextTick = millis();
    timerSeconds = 0;
    currentStage = 0;
    startTemp = temperature_read();
+   lastKey = KEY_NONE;
 
-   // Start timer
-   FlexiTimer2::set(PID_SAMPLE_TIME, runAs_profile_refresh);
-   FlexiTimer2::start();
+   buzzer_start_tone();
 
+   // Run the moonitoring loop
    for(boolean exit = false; !exit; )
    {
-      keyboard_waitForAnyKey();
+      if (millis() > nextTick) { 
+        nextTick += PID_SAMPLE_TIME; 
+        profileTick(); 
+      }
+    
+      keyboard_scan();
       if(lastKey==KEY_AH) exit = true;
    }
-   analogWrite(PINS_SSR, 0);
-   FlexiTimer2::stop();
 
+   // Turn off the heater
+   analogWrite(PINS_SSR, 0);
+
+   // Exit the runmode
    display_printAborting();
    keyboard_waitForNokey();
 
 }
 
-void runAs_profile_refresh()
+void profileTick()
 {
-   // Update PID input
-   pid_input = temperature_read();
+  // Shut down and short circuit if we've finished
+  if (currentStage > REFLOW_STAGE_COOL) { analogWrite(PINS_SSR, 0); display_printTitle(F("Complete!")); return; }
+  
+  // Read the current temperature
+  pid_input = temperature_read();
 
-   // Display status
-   profile_displayStatus();
-
-   // Check if is complete
-   if (currentStage > REFLOW_STAGE_COOL) {
-
-      // Turn off the oven
-      analogWrite(PINS_SSR, 0);
-
-      buzzer_finish_tone();
-
-      // Return doing nothing
-      return;
-   }
-
-   // Configure PID refresh
-   pid_setPoint = profile_calculateSetPoint();
-   reflowOvenPID.SetTunings(currentReflowProfile[currentStage].pid_kp, currentReflowProfile[currentStage].pid_ki, currentReflowProfile[currentStage].pid_kd);
-   reflowOvenPID.Compute();
-
-   // Put PID output to SSR
-   analogWrite(PINS_SSR, pid_output);
-
-   // Log to serial for charts
-   logger_log(timerSeconds, pid_setPoint, pid_input, pid_output, currentReflowProfile[currentStage].name);
-
-   // Check if temperature is reached
-   if (currentStage < REFLOW_STAGE_COOL) {
-
-      if ( pid_input >= currentReflowProfile[currentStage].targetTemperature &&
-         currentReflowProfile[currentStage].elapsedTime >= currentReflowProfile[currentStage].durationInSeconds) {
-         currentStage++;
-         buzzer_stage_tone();
-      } else {
-         currentReflowProfile[currentStage].elapsedTime++;
-      }
-   } else {
-      if ( pid_input <= currentReflowProfile[currentStage].targetTemperature &&
-         currentReflowProfile[currentStage].elapsedTime >= currentReflowProfile[currentStage].durationInSeconds) {
-         currentStage++;
-      } else {
-         currentReflowProfile[currentStage].elapsedTime++;
-      }
-   }
-
-   // Increase seconds timer for reflow curve analysis
-   timerSeconds++;
-
+  // Update the stage
+  if ( stageIsComplete() ) advanceToNextStage();
+  
+  // Run PID computation
+  pid_setPoint = profile_calculateSetPoint();
+  reflowOvenPID.Compute();
+  
+  // Put PID output to SSR
+  analogWrite(PINS_SSR, pid_output);
+  
+  // Update the screen
+  display_printTemperature(currentReflowProfile[currentStage].name, pid_input, timerSeconds);
+  
+  // Log to serial for charts
+  logger_log(timerSeconds, pid_setPoint, pid_input, pid_output, currentReflowProfile[currentStage].name);
+  
+  // Increment our timers
+  currentReflowProfile[currentStage].elapsedTime++;
+  timerSeconds++;
 }
 
-void profile_displayStatus(){
+// Check if the current stage has been completed
+boolean stageIsComplete() {
+  boolean tempReached = pid_input >= currentReflowProfile[currentStage].targetTemperature;
+  boolean durationReached = currentReflowProfile[currentStage].elapsedTime >= currentReflowProfile[currentStage].durationInSeconds;
 
-   if (currentStage > REFLOW_STAGE_COOL) {
-      display_printTitle(F("Finished!"));
-   }
-   else
-   {
-      display_printTitle(currentReflowProfile[currentStage].name);
-   }
+  // Cooling stage gets treated diffrent, we need the temp to be UNDER the setpoint
+  if (currentStage == REFLOW_STAGE_COOL) {
+    tempReached = pid_input <= currentReflowProfile[currentStage].targetTemperature;
+  }
 
-    display.setCursor(0, 20);
-    display.setTextSize(2);
-    display.print(pid_input, 1);
-    display.setCursor(display.getCursorX(), display.getCursorY() - 6);
-    display.write(9);
-    display.setCursor(display.getCursorX(), display.getCursorY() + 6);
-    display.println(F("C"));
-    display.setTextSize(1);
-    display.setCursor(0, display.getCursorY() + 4);
-    display.print(timerSeconds);
-    display.println("s");
-    display.display();
+  return tempReached & durationReached;
+}
+
+void advanceToNextStage() {
+  // Notiy the user audibly
+  buzzer_stage_tone();
+  
+  // Increment the stage counter
+  currentStage++;
+
+  // Set PID tunings for the new stage
+  reflowOvenPID.SetTunings(currentReflowProfile[currentStage].pid_kp, currentReflowProfile[currentStage].pid_ki, currentReflowProfile[currentStage].pid_kd);
 }
 
 double profile_calculateSetPoint(){
@@ -182,7 +162,7 @@ double profile_calculateSetPoint(){
    // Set start temperature for this stage
    double startTemperature = 0;
    if (currentStage == REFLOW_STAGE_PREHEAT) {
-      startTemperature = currentReflowProfile[REFLOW_STAGE_PREHEAT].targetTemperature;
+      startTemperature = startTemp;
    } else {
       startTemperature = currentReflowProfile[currentStage-1].targetTemperature;
    }

@@ -5,7 +5,6 @@
 #include <Adafruit_PCD8544.h>
 #include <Adafruit_MAX31855.h>
 #include <PID_v1.h>
-#include "FlexiTimer2_local.h"
 #include <NewTone.h>
 #include "pitches.h"
 

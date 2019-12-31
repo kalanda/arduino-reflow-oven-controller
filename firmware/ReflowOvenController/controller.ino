@@ -23,7 +23,7 @@ void controller_showMainMenu()
     if(lastKey==KEY_AH) exit = true;
     if(lastKey==KEY_B)
     {
-          if(currentOption==0) runAs_tempMonitor();
+          if(currentOption==0) runmode_Monitor();
           if(currentOption==1) controller_showProfileMenu();
           if(currentOption==2) controller_showSettingsMenu();
     }
@@ -48,8 +48,8 @@ void controller_showProfileMenu()
     if(lastKey==KEY_AH) exit = true;
     if(lastKey==KEY_B)
     {
-          if(currentOption==0) runAs_profile(REFLOW_PROFILE_LEADED);
-          if(currentOption==1) runAs_profile(REFLOW_PROFILE_LEADFREE);
+          if(currentOption==0) runmode_Profile(REFLOW_PROFILE_LEADED);
+          if(currentOption==1) runmode_Profile(REFLOW_PROFILE_LEADFREE);
     }
   }
 }

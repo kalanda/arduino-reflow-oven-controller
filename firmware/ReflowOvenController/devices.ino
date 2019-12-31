@@ -134,6 +134,35 @@ void display_printAborting()
     display.display();
 }
 
+// prints the temperature monitor and elapsed time
+void display_printTemperature(String title, double temperature, int seconds)
+{
+    // Clear the screen buffer
+    display.clearDisplay();
+
+    // Add a title
+    display_printTitle(title);
+
+    // Display the temperature
+    display.setCursor(0,20);
+    display.setTextSize(2);
+    display.print(temperature, 1);
+    display.setCursor(display.getCursorX(), display.getCursorY() - 6);
+    display.write(9);
+    display.setCursor(display.getCursorX(), display.getCursorY() + 6);
+    display.println(F("C"));
+    display.setTextSize(1);
+
+    // Display the elapsed time
+    display.setCursor(0, display.getCursorY() + 4);
+    display.print(seconds);
+    display.println("s");
+    display.display();
+
+    // Push the screen buffer out
+    display.display();
+}
+
 double temperature_read(){
 
   double read = thermocouple.readCelsius();
